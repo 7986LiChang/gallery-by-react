@@ -1,8 +1,12 @@
 html, body{
   width: 100%;
   height: 100%;
-  background-color: #222;
+  background-color: #ddd;
 }
+
+/*img{
+  width: 240px;
+}*/
 
 .app{
   width: 100%;
@@ -19,13 +23,38 @@ html, body{
 /*stage --end*/
 
 /*image --start*/
-.image-sec{
+.image-sec {
   position: relative;
 
   width: 100%;
   height: 100%;
 
   background-color: #ddd;
+
+  @at-root{
+    .img-figure {
+      position: absolute;
+
+      width: 320px;
+      height: 360px;
+      margin: 0;
+      padding: 40px;
+  
+      background-color: #fff;
+      box-sizing: border-box; 
+    }
+
+    figcaption{
+      text-align: center;
+
+      .img-title{
+        margin: 20px 0 0 0;
+
+        color: #ddd;
+        font-size: 16px;
+      }
+    }
+  }
 }
 /*image --end*/
 
