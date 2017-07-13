@@ -39,8 +39,24 @@ function get30DegRandom(){
 	return ((Math.random() > 0.5 ? '' : '-') + Math.ceil(Math.random() * 30)); //0.5概率为正，0.5概率为负
 }
 
-
+//图片组件
 class ImageFirgure extends React.Component {
+	// 在构造函数中处理handleClick事件函数
+	constructor(props){
+		super(props);
+		this.handleClick = this.handleClick.bind(this);
+	}
+	/*
+	 * imgFigure的点击处理函数
+	 */
+	handleClick(event){
+
+		this.props.inverse();
+
+		// 取消默认事件处理操作
+		event.stopPropagation();
+		event.preventDafult();
+	}
 
 	render() {
 
@@ -60,21 +76,29 @@ class ImageFirgure extends React.Component {
 			
 		}
 
+		//设置图片翻转样式  正面 .img-figure   反面 .img-figure-is-inverse
+		let imgFigureClassName = 'img-figure';
+		imgFigureClassName += this.props.arrange.isInverse ? 'is-inverse' : '';
+
 		return (
-			<figure className="img-figure" style={styleObj}>
+			<figure className={imgFigureClassName} style={styleObj} onClick={this.handleClick}>
 				<img src={this.props.data.imageURL} alt={this.props.data.title}/>
-				<figcaption className="img-title">
-					<p>{this.props.data.title}</p>
+
+				<figcaption>
+					<h2 className="img-title">{this.props.data.title}</h2>
+					<div className="img-back" onClick={this.handleClick}>
+						<p>
+							{this.props.data.desc}
+						</p>
+					</div>
 				</figcaption>
 			</figure>
 			);
 	}
 }
 
-// ImageFirgure.defaultProps = {
-// };
 
-
+//“大管家” AppComponent组件
 class AppComponent extends React.Component {
 	//生命state,在constructor中,imgsArrangeArr存储所有图片位置状态
 	constructor(props) {
@@ -102,15 +126,37 @@ class AppComponent extends React.Component {
 		this.state = {
 			imgsArrangeArr: [
 				/*{
-					pos：{
+					pos：{ //位置
 						left: '0',
 						right: '0'
 					},
-					rotate: 0
+					rotate: 0,   //旋转角度
+					isInverse: false     //图片正反面，默认false反面
 				}*/
 			]
 		};
 	}
+
+  	
+  	/*
+  	 *  翻转图片
+  	 *  @param index 输入当前被执行inverse操作的图片所对应的图片信息数组的index值
+  	 *  @return {Function} 这是一个闭包函数,在一个函数内部定义另一个函数，其内return是一个真正待被执行的函数
+  	 */
+  	inverse(index){
+  		return function(){
+  			let imgsArrangeArr = this.state.imgsArrangeArr;
+
+  			imgsArrangeArr[index].isInverse = !imgsArrangeArr[index].isInverse;
+
+  			this.setState({
+  				imgsArrangeArr:imgsArrangeArr
+  			});
+
+  		}.bind(this);     //通过bind(this),传入当前对象AppComponent
+  	}
+
+
 
 	/*
 	 *  重新布局图片
@@ -248,11 +294,13 @@ class AppComponent extends React.Component {
 					left: 0,
 					right: 0
 				},
-				rotate: 0
+				rotate: 0,
+				isInverse: false
 			};
 		}
 		//否则为其随机位置
-		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]}/>);
+		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]}
+			inverse={this.inverse(index)}/>);
 	}.bind(this));
 
     return (
