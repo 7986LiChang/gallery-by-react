@@ -5,10 +5,9 @@ require('styles/App.scss');
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {findDOMNode} from 'react-dom';
 
 
-let yeomanImage = require('../images/yeoman.png');
+// let yeomanImage = require('../images/yeoman.png');
 
 //获取图片相关的数据
 let imageDatas = require('../data/imageDatas.json');
@@ -30,7 +29,14 @@ imageDatas = (function genImageURL(imageDatasArr){
  * 获取区间内的随机值
  */
 function getRangeRandom(low, high){
-	return Math.ceil(Math.random() * (high - low) + low); 
+	return Math.ceil(Math.random() * (high - low) + low);
+}
+
+/*
+ * 获取 0~30° 之间的一个任意正负值
+ */
+function get30DegRandom(){
+	return ((Math.random() > 0.5 ? '' : '-') + Math.ceil(Math.random() * 30)); //0.5概率为正，0.5概率为负
 }
 
 
@@ -40,9 +46,20 @@ class ImageFirgure extends React.Component {
 
 		let styleObj = {};
 
+		//在组件中应用样式
 		if(this.props.arrange.pos){
 			styleObj = this.props.arrange.pos;
 		}
+
+		//如果图片的旋转角度有值且不为0，添加旋转角度
+		if(this.props.arrange.rotate){
+			(['Moz', 'ms', 'Webkit', '']).forEach(function(value)
+			{
+				styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
+			}.bind(this));
+			
+		}
+
 		return (
 			<figure className="img-figure" style={styleObj}>
 				<img src={this.props.data.imageURL} alt={this.props.data.title}/>
@@ -68,19 +85,19 @@ class AppComponent extends React.Component {
 			//中心位置取值
 			centerPos: {
 				left: 0,
-				right: 0,
+				right: 0
 			},
 			//水平方向取值范围
 			hPosRange: {
 				leftSecX: [0, 0],
 				rightSecX: [0, 0],
-				y: [0, 0],
+				y: [0, 0]
 			},
 			//垂直方向取值范围
 			vPosRange: {
 				x: [0, 0],
-				topY: [0, 0],
-			},
+				topY: [0, 0]
+			}
 		};
 		this.state = {
 			imgsArrangeArr: [
@@ -88,7 +105,8 @@ class AppComponent extends React.Component {
 					pos：{
 						left: '0',
 						right: '0'
-					}
+					},
+					rotate: 0
 				}*/
 			]
 		};
@@ -96,7 +114,7 @@ class AppComponent extends React.Component {
 
 	/*
 	 *  重新布局图片
-	 *  @param centerIndex指定居中哪个图片	
+	 *  @param centerIndex指定居中哪个图片
 	 */
 	rearrange(centerIndex) {
 		let imgsArrangeArr = this.state.imgsArrangeArr,
@@ -112,25 +130,29 @@ class AppComponent extends React.Component {
 
 			//存储布局在上侧区域的图片
 			imgsArrangeTopArr = [],
-			//取1个/0个位于上侧区域
-			topImgNum = Math.ceil(Math.random() * 2),
-			//布局在上侧区域的图片标识
+			topImgNum = Math.ceil(Math.random() * 2), //取一个或者不取
 			topImgSpliceIndex = 0,
 
-			//取出居中位置的图片状态，imgsArrangeArr
 			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
+
 			//1、首先居中 centerIndex 的图片
 			imgsArrangeCenterArr[0].pos = centerPos;
+
+			//居中的centerIndex不需要旋转
+			imgsArrangeCenterArr[0].rotate = 0;
 
 			//2、取出要布局上侧的图片的状态信息
 			topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum));
 			imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgSpliceIndex)
 			//布局位于上侧的图片
 			imgsArrangeTopArr.forEach( function (value, index) {
-				imgsArrangeTopArr[index].pos = {
-					left: getRangeRandom(vPosRangeX[0], vPosRangeX[1]),
-					top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1])
-				}
+				imgsArrangeTopArr[index] = {
+					pos:{
+						left: getRangeRandom(vPosRangeX[0], vPosRangeX[1]),
+						top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1])
+					},
+					rotate: get30DegRandom()
+				};
 			});
 
 			//3、布局左右两侧的图片
@@ -146,9 +168,12 @@ class AppComponent extends React.Component {
 					hPosRangeLORx = hPosRangeRightSecX;
 				}
 
-				imgsArrangeArr[i].pos = {
-					left: getRangeRandom(hPosRangeLORx[0], hPosRangeLORx[1]),
-					top: getRangeRandom(hPosRangeY[0], hPosRangeY[1])
+				imgsArrangeArr[i] = {
+					pos: {
+						left: getRangeRandom(hPosRangeLORx[0], hPosRangeLORx[1]),
+						top: getRangeRandom(hPosRangeY[0], hPosRangeY[1])
+					},
+					rotate: get30DegRandom()
 				};
 			}
 
@@ -203,7 +228,7 @@ class AppComponent extends React.Component {
 		this.Constant.vPosRange.x[0] = halfStageW - imgW;
 		this.Constant.vPosRange.x[1] = halfStageW;
 		this.Constant.vPosRange.topY[0] = -halfimgH;
-		this.Constant.vPosRange.topY[1] = halfStageH - halfimgH * 3;		
+		this.Constant.vPosRange.topY[1] = halfStageH - halfimgH * 3;
 
 		//布局所有图片,指定居中图片index
 		this.rearrange(5);
@@ -222,7 +247,8 @@ class AppComponent extends React.Component {
 				pos: {
 					left: 0,
 					right: 0
-				}
+				},
+				rotate: 0
 			};
 		}
 		//否则为其随机位置
@@ -233,11 +259,11 @@ class AppComponent extends React.Component {
       <section className="stage" ref="stage">
       	<section className="img-sec">
       		{imgFigures}
-      	</section>	
+      	</section>
       	<nav className="controller-nav">
       		{controllerUnits}
       	</nav>
-      </section>		
+      </section>
     );
   }
 }
