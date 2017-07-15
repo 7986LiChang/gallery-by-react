@@ -29,7 +29,7 @@ imageDatas = (function genImageURL(imageDatasArr){
  * 获取区间内的随机值
  */
 function getRangeRandom(low, high){
-	return Math.ceil(Math.random() * (high - low) + low);
+	return Math.floor(Math.random() * (high - low) + low);
 }
 
 /*
@@ -42,14 +42,14 @@ function get30DegRandom(){
 //图片组件
 class ImageFirgure extends React.Component {
 	// 在构造函数中处理handleClick事件函数
-	constructor(props){
+	constructor(props) {
 		super(props);
 		this.handleClick = this.handleClick.bind(this);
 	}
 	/*
 	 * imgFigure的点击处理函数
 	 */
-	handleClick(event){
+	handleClick(event) {
 
 		this.props.inverse();
 
@@ -63,12 +63,12 @@ class ImageFirgure extends React.Component {
 		let styleObj = {};
 
 		//在组件中应用样式
-		if(this.props.arrange.pos){
+		if(this.props.arrange.pos) {
 			styleObj = this.props.arrange.pos;
 		}
 
 		//如果图片的旋转角度有值且不为0，添加旋转角度
-		if(this.props.arrange.rotate){
+		if(this.props.arrange.rotate) {
 			(['Moz', 'ms', 'Webkit', '']).forEach(function(value)
 			{
 				styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
@@ -78,7 +78,8 @@ class ImageFirgure extends React.Component {
 
 		//设置图片翻转样式  正面 .img-figure   反面 .img-figure-is-inverse
 		let imgFigureClassName = 'img-figure';
-		imgFigureClassName += this.props.arrange.isInverse ? 'is-inverse' : '';
+		//根据isInverse翻转属性，设定imgFigureClassName,从而修改样式
+		imgFigureClassName += this.props.arrange.isInverse ? ' is-inverse ' : '';
 
 		return (
 			<figure className={imgFigureClassName} style={styleObj} onClick={this.handleClick}>
@@ -88,7 +89,7 @@ class ImageFirgure extends React.Component {
 					<h2 className="img-title">{this.props.data.title}</h2>
 					<div className="img-back" onClick={this.handleClick}>
 						<p>
-							{this.props.data.desc}
+							{this.props.data.description}
 						</p>
 					</div>
 				</figcaption>
@@ -152,7 +153,6 @@ class AppComponent extends React.Component {
   			this.setState({
   				imgsArrangeArr:imgsArrangeArr
   			});
-
   		}.bind(this);     //通过bind(this),传入当前对象AppComponent
   	}
 
@@ -176,7 +176,7 @@ class AppComponent extends React.Component {
 
 			//存储布局在上侧区域的图片
 			imgsArrangeTopArr = [],
-			topImgNum = Math.ceil(Math.random() * 2), //取一个或者不取
+			topImgNum = Math.floor(Math.random() * 2), //取一个或者不取
 			topImgSpliceIndex = 0,
 
 			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
@@ -188,7 +188,7 @@ class AppComponent extends React.Component {
 			imgsArrangeCenterArr[0].rotate = 0;
 
 			//2、取出要布局上侧的图片的状态信息
-			topImgSpliceIndex = Math.ceil(Math.random() * (imgsArrangeArr.length - topImgNum));
+			topImgSpliceIndex = Math.floor(Math.random() * (imgsArrangeArr.length - topImgNum));
 			imgsArrangeTopArr = imgsArrangeArr.splice(topImgSpliceIndex, topImgSpliceIndex)
 			//布局位于上侧的图片
 			imgsArrangeTopArr.forEach( function (value, index) {
@@ -299,8 +299,7 @@ class AppComponent extends React.Component {
 			};
 		}
 		//否则为其随机位置
-		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]}
-			inverse={this.inverse(index)}/>);
+		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)}/>);
 	}.bind(this));
 
     return (
