@@ -50,12 +50,18 @@ class ImageFirgure extends React.Component {
 	 * imgFigure的点击处理函数
 	 */
 	handleClick(event) {
-
-		this.props.inverse();
+		//判断当前图片是否居中，若否，则居中图片
+		if(!this.props.arrange.isCenter){
+			this.props.center();
+		}
+		//若是居中图片，则翻转
+		else{
+			this.props.inverse();
+		}
 
 		// 取消默认事件处理操作
 		event.stopPropagation();
-		event.preventDafult();
+		event.preventDefault();
 	}
 
 	render() {
@@ -73,7 +79,10 @@ class ImageFirgure extends React.Component {
 			{
 				styleObj[value + 'Transform'] = 'rotate(' + this.props.arrange.rotate + 'deg)';
 			}.bind(this));
-			
+		}
+
+		if(this.props.arrange.isCenter){
+			styleObj.zIndex = 11;
 		}
 
 		//设置图片翻转样式  正面 .img-figure   反面 .img-figure-is-inverse
@@ -133,6 +142,7 @@ class AppComponent extends React.Component {
 					},
 					rotate: 0,   //旋转角度
 					isInverse: false     //图片正反面，默认false反面
+					isCenter: false     //图片是否居中
 				}*/
 			]
 		};
@@ -156,7 +166,14 @@ class AppComponent extends React.Component {
   		}.bind(this);     //通过bind(this),传入当前对象AppComponent
   	}
 
-
+  	/*
+     * 居中图片
+  	 */
+  	center(index){
+  		return function(){
+  			this.rearrange(index);
+  		}.bind(this);
+  	}
 
 	/*
 	 *  重新布局图片
@@ -181,11 +198,12 @@ class AppComponent extends React.Component {
 
 			imgsArrangeCenterArr = imgsArrangeArr.splice(centerIndex, 1);
 
-			//1、首先居中 centerIndex 的图片
-			imgsArrangeCenterArr[0].pos = centerPos;
-
-			//居中的centerIndex不需要旋转
-			imgsArrangeCenterArr[0].rotate = 0;
+			//1、首先居中 centerIndex 的图片,centerIndex不需要旋转,居中
+			imgsArrangeCenterArr[0] = {
+				pos: centerPos,
+				rotate: 0,
+				isCenter: true
+			};
 
 			//2、取出要布局上侧的图片的状态信息
 			topImgSpliceIndex = Math.floor(Math.random() * (imgsArrangeArr.length - topImgNum));
@@ -197,7 +215,8 @@ class AppComponent extends React.Component {
 						left: getRangeRandom(vPosRangeX[0], vPosRangeX[1]),
 						top: getRangeRandom(vPosRangeTopY[0], vPosRangeTopY[1])
 					},
-					rotate: get30DegRandom()
+					rotate: get30DegRandom(),
+					isCenter: false
 				};
 			});
 
@@ -219,7 +238,8 @@ class AppComponent extends React.Component {
 						left: getRangeRandom(hPosRangeLORx[0], hPosRangeLORx[1]),
 						top: getRangeRandom(hPosRangeY[0], hPosRangeY[1])
 					},
-					rotate: get30DegRandom()
+					rotate: get30DegRandom(),
+					isCenter: false
 				};
 			}
 
@@ -299,7 +319,7 @@ class AppComponent extends React.Component {
 			};
 		}
 		//否则为其随机位置
-		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)}/>);
+		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
 	}.bind(this));
 
     return (
