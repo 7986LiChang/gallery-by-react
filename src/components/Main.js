@@ -50,13 +50,13 @@ class ImageFirgure extends React.Component {
 	 * imgFigure的点击处理函数
 	 */
 	handleClick(event) {
-		//判断当前图片是否居中，若否，则居中图片
-		if(!this.props.arrange.isCenter){
-			this.props.center();
-		}
-		//若是居中图片，则翻转
-		else{
+		//若点击居中图片，则翻转
+		if(this.props.arrange.isCenter){
 			this.props.inverse();
+		}
+		//否则，将图片居中
+		else{
+			this.props.center();
 		}
 
 		// 取消默认事件处理操作
@@ -104,6 +104,44 @@ class ImageFirgure extends React.Component {
 				</figcaption>
 			</figure>
 			);
+	}
+}
+
+//控制组件
+class ControllerUnit extends React.Component {
+	constructor(props) {
+		super(props);
+		this.handleClick = this.handleClick.bind(this);
+	}
+
+	handleClick(event) {
+		if(this.props.arrange.isCenter){
+			this.props.inverse();
+		}
+		else{
+			this.props.center();
+		}
+
+
+		event.stopPropagation();
+		event.preventDefault();
+	}
+
+	render() {
+
+		let controllerUnitClassName = 'controller-unit';
+
+		//如果对应的是居中的图片，显示控制按钮的居中态
+		if(this.props.arrange.isCenter){
+			controllerUnitClassName += ' is-center';
+		}
+		if(this.props.arrange.isCenter && this.props.arrange.isInverse){
+			controllerUnitClassName += ' is-center' + ' is-inverse';
+		}
+
+		return (
+			<span className={controllerUnitClassName} onClick={this.handleClick}></span>
+		);
 	}
 }
 
@@ -245,6 +283,9 @@ class AppComponent extends React.Component {
 				};
 			}
 
+
+
+
 			//将取出的填充上侧区域的图片状态信息放回
 			if(imgsArrangeTopArr && imgsArrangeTopArr[0]){
 				imgsArrangeArr.splice(topImgSpliceIndex, 0, imgsArrangeTopArr[0]);
@@ -258,6 +299,7 @@ class AppComponent extends React.Component {
 				imgsArrangeArr: imgsArrangeArr
 			});
 
+			// debugger;
 	}
 
 	
@@ -299,7 +341,7 @@ class AppComponent extends React.Component {
 		this.Constant.vPosRange.topY[1] = halfStageH - halfimgH * 3;
 
 		//布局所有图片,指定居中图片index
-		this.rearrange(5);
+		this.rearrange(0);
 	}
 
   render() {
@@ -317,12 +359,18 @@ class AppComponent extends React.Component {
 					top: 0
 				},
 				rotate: 0,
-				isInverse: false
+				isInverse: false,
+				isCenter: false
 			};
 		}
 		//否则为其随机位置
-		imgFigures.push(<ImageFirgure data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
+		imgFigures.push(<ImageFirgure key={index} data = {value} ref={'imgFigure' + index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
+
+		controllerUnits.push(<ControllerUnit key={index} arrange={this.state.imgsArrangeArr[index]} inverse={this.inverse(index)} center={this.center(index)}/>);
 	}.bind(this));
+
+
+
 
     return (
       <section className="stage" ref="stage">
